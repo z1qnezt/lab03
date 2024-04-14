@@ -170,13 +170,23 @@ project(formatter_ex)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CURRENT_SOURCE_DIR /Users/mihailerosenko/z1qnezt/workspace/tasks/lab03/formatter_ex_lib)
 
-add_library(formatter_ex STATIC ${CMAKE_CURRENT_SOURCE_DIR}/formatter_ex.cpp)
+# Установим путь к директории formatter_ex_lib
+set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/formatter_ex_lib)
 
+# Явно перечислим исходные файлы
+set(SOURCES
+    formatter_ex.cpp
+)
+
+# Создадим библиотеку formatter_ex
+add_library(formatter_ex STATIC ${SOURCES})
+
+# Установим директорию для поиска заголовочных файлов
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/formatter_lib)
 
+# Добавим зависимость от библиотеки formatter
 target_link_libraries(formatter_ex formatter)
 ```
 ---
@@ -358,23 +368,32 @@ cmake -H. -B_build
 ---
 ### Содержимое CMakeLists.txt:
 ```
-ccmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.29)
 project(solver)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CURRENT_SOURCE_DIR /Users/mihailerosenko/z1qnezt/workspace/tasks/lab03)
 
+# Добавляем директиву include_directories для поиска заголовочных файлов
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/solver_lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/formatter_lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/formatter_ex_lib
+)
+
+# Создаем библиотеку solver_lib
 add_library(solver_lib STATIC ${CMAKE_CURRENT_SOURCE_DIR}/solver_lib/solver.cpp)
 
-include_directories(/solver_lib /formatter_lib /formatter_ex_lib)
-
+# Создаем исполняемый файл solver и связываем его с библиотеками
 add_executable(solver ${CMAKE_CURRENT_SOURCE_DIR}/solver_application/equation.cpp)
 
+# Ищем библиотеки formatter, formatter_ex, и solver_lib
 find_library(formatter NAMES libformatter.a PATHS ${CMAKE_CURRENT_SOURCE_DIR}/formatter_lib)
 find_library(formatter_ex NAMES libformatter_ex.a PATHS ${CMAKE_CURRENT_SOURCE_DIR}/formatter_ex_lib)
 find_library(solver_lib NAMES libsolver.a PATHS ${CMAKE_CURRENT_SOURCE_DIR}/solver_lib)
 
+# Связываем исполняемый файл с библиотеками
 target_link_libraries(solver ${formatter} ${formatter_ex} ${solver_lib})
 ```
 ---
@@ -383,6 +402,8 @@ cmake --build _build
 ```
 ### Вывод:
 ```
+[ 25%] Building CXX object CMakeFiles/solver_lib.dir/Users/mihailerosenko/z1qnezt/workspace/tasks/lab03/solver_lib/solver.cpp.o
+[ 50%] Linking CXX static library libsolver_lib.a
 [ 50%] Built target solver_lib
 [ 75%] Building CXX object CMakeFiles/solver.dir/equation.cpp.o
 [100%] Linking CXX executable solver
